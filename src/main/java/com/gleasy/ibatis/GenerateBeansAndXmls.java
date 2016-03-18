@@ -567,7 +567,8 @@ public class GenerateBeansAndXmls {
 		bean.append("\r\n");
 		bean.append("\r\n");
 
-		bean.append("<resultMap id='" + this.getBeanInstanceName(table) + "Map' class='" + this.getBeanName(table) + "'>");
+		bean.append("<resultMap id='" + this.getBeanInstanceName(table) + "Map' class='java.util.HashMap'>");
+		//bean.append("<resultMap id='" + this.getBeanInstanceName(table) + "Map' class='" + this.getBeanName(table) + "'>");
 		Set<String> fieldNames = fields.keySet();
 
 		for (String fieldName : fieldNames) {
@@ -676,18 +677,25 @@ public class GenerateBeansAndXmls {
 
 		bean.append("\r\n");
 		bean.append("\r\n");
+		bean.append("<sql id='params'>");
+		//bean.append("<dynamic prepend=''>");
+		for (String fieldName : fieldNames) {
+			bean.append("<isNotNull prepend=' and ' property='" + this.getPropertyName(fieldName) + "'>");
+			bean.append(fieldName + " = #" + this.getPropertyName(fieldName) + "#");
+			bean.append("</isNotNull>");
+		}
+		//bean.append("</dynamic>");
+		
+		bean.append("</sql>");
+		
+		bean.append("\r\n");
+		bean.append("\r\n");
 
 		bean.append("<select id='count' resultClass='Integer' parameterClass='java.util.Map'>");
 		bean.append("select count(*) from " + table);
 		bean.append(" where 1=1 ");
 		bean.append("<dynamic prepend=''>");
-		
-		for (String fieldName : fieldNames) {
-			
-			bean.append("<isNotNull prepend=' and ' property='" + this.getPropertyName(fieldName) + "'>");
-			bean.append(fieldName + " = #" + this.getPropertyName(fieldName) + "#");
-			bean.append("</isNotNull>");
-		}
+		bean.append("<include refid='params'/>");
 		bean.append("</dynamic>");
 		bean.append("</select>");
 		
@@ -705,16 +713,17 @@ public class GenerateBeansAndXmls {
 		if(isSqlServer){
 			bean.append(" WHERE 1 = 1 ");
 			bean.append("<dynamic prepend=''>");
+			bean.append("<include refid='params'/>");
 		}else{
 			bean.append("<dynamic prepend='where 1 = 1'>");
-		}
-		
-		for (String fieldName : fieldNames) {
-			bean.append("<isNotNull prepend=' and ' property='" + this.getPropertyName(fieldName) + "'>");
-			bean.append(fieldName + " = #" + this.getPropertyName(fieldName) + "#");
-			bean.append("</isNotNull>");
+			for (String fieldName : fieldNames) {
+				bean.append("<isNotNull prepend=' and ' property='" + this.getPropertyName(fieldName) + "'>");
+				bean.append(fieldName + " = #" + this.getPropertyName(fieldName) + "#");
+				bean.append("</isNotNull>");
+			}
 		}
 		bean.append("</dynamic>");
+		
 		if(isSqlServer){
 			bean.append(" ) AS A ");
 			bean.append(" WHERE  InnerPDTRRowNo7788 > #pageIndex#*#pageSize#");
@@ -732,16 +741,17 @@ public class GenerateBeansAndXmls {
 		if(isSqlServer){
 			bean.append(" WHERE 1 = 1 ");
 			bean.append("<dynamic prepend=''>");
+			bean.append("<include refid='params'/>");
 		}else{
 			bean.append("<dynamic prepend='where 1 = 1'>");
-		}
-		
-		for (String fieldName : fieldNames) {
-			bean.append("<isNotNull prepend=' and ' property='" + this.getPropertyName(fieldName) + "'>");
-			bean.append(fieldName + " = #" + this.getPropertyName(fieldName) + "#");
-			bean.append("</isNotNull>");
+			for (String fieldName : fieldNames) {
+				bean.append("<isNotNull prepend=' and ' property='" + this.getPropertyName(fieldName) + "'>");
+				bean.append(fieldName + " = #" + this.getPropertyName(fieldName) + "#");
+				bean.append("</isNotNull>");
+			}
 		}
 		bean.append("</dynamic>");
+		
 		bean.append("</select>");
 		
 		bean.append("\r\n");
