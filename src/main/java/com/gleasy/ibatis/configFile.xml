@@ -3,4 +3,10 @@
 	<includeTables>
 		<value>pdtr_doctor_parameter</value>
 	</includeTables>
+	<url>
+		
+	</url>
+	<packagePrefix>
+		
+	</packagePrefix>
 </context>

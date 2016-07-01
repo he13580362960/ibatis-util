@@ -22,7 +22,7 @@ public class IbatisUtil {
     private JPanel panel;
     private JScrollPane scrollPane;
     private JPanel panel_2;
-
+    private Configuration configuration;
     /**
      * Launch the application.
      */
@@ -49,7 +49,21 @@ public class IbatisUtil {
     /**
      * Initialize the contents of the frame.
      */
+    
+    private void parseConfigation(){
+    	configuration = ConfigurationParser.parse("./configFile.xml");
+    	
+    	if(configuration.getUrl() != null){
+    		url.setText(configuration.getUrl());
+    	}
+    	
+    	if(configuration.getPackagePrefix() != null){
+    		packagePrefix.setText(configuration.getPackagePrefix());
+    	}
+    }
+    
     private void initialize() {
+    	
         frmIbatisutil = new JFrame();
         frmIbatisutil.setTitle("IbatisUtil");
         frmIbatisutil.setBounds(100, 100, 600, 450);
@@ -65,7 +79,7 @@ public class IbatisUtil {
         url.setAlignmentX(Component.LEFT_ALIGNMENT);
         panel.add(url);
         //url.setText("jdbc:sqlserver://183.131.153.162:1433;DatabaseName=implatform;user=pdtr;password=pdtr123456;");
-        url.setText("jdbc:sqlserver://123.59.87.196:1433;DatabaseName=AZPlatForm;user=kchf526pa;password=help7575;");
+        //url.setText("jdbc:sqlserver://123.59.87.196:1433;DatabaseName=AZPlatForm;user=kchf526pa;password=help7575;");
         //url.setText("jdbc:mysql://192.168.0.11:3307/sample-local-0?user=mysql3307&password=mysql3307");
         url.setColumns(10);
 
@@ -74,18 +88,18 @@ public class IbatisUtil {
         packagePrefix.setAlignmentX(0.0f);
         panel.add(packagePrefix);
         //packagePrefix.setText("com.gleasy.pdtr");
-        packagePrefix.setText("com.gleasy.biso");
+        //packagePrefix.setText("com.gleasy.biso");
         packagePrefix.setColumns(10);
 
         JButton go = new JButton("GO");
         panel.add(go);
+        parseConfigation();
         go.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 log.setText("ING...!");
                 new Thread() {
                     public void run() {
                         try {
-                        	Configuration configuration = ConfigurationParser.parse("./configFile.xml");
                         	GenerateBeansAndXmls g = new GenerateBeansAndXmls(url.getText(), packagePrefix.getText());
                             if(configuration.getIncludeTables().isEmpty()){
                             	g.generate();

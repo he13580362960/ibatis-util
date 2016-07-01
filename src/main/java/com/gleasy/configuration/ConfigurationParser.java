@@ -33,9 +33,24 @@ public class ConfigurationParser {
 			if("includeTables".equals(name)){
 				parseIncludeTables(element,configuration);
 			}
+			if("url".equals(name)){
+				parseUrl(element,configuration);
+			}
+			if("packagePrefix".equals(name)){
+				parsePackagePrefix(element,configuration);
+			}
 		}
 		return configuration;
 	}
+	
+	private static void parseUrl(Element element, Configuration configuration){
+		configuration.setUrl(element.getText().trim());
+	}
+	
+	private static void parsePackagePrefix(Element element, Configuration configuration){
+		configuration.setPackagePrefix(element.getText().trim());
+	}
+	
 	private static void parseIncludeTables(Element element, Configuration configuration){
 		List<Element> values = element.elements();
 		for(Element value : values){

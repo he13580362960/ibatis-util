@@ -10,6 +10,21 @@ import org.dom4j.io.SAXReader;
 
 public class Configuration {
 	private List<String> includeTables = new ArrayList<String>();
+	private String url = null;
+	private String packagePrefix = null;
+	
+	public String getUrl() {
+		return url;
+	}
+	public void setUrl(String url) {
+		this.url = url;
+	}
+	public String getPackagePrefix() {
+		return packagePrefix;
+	}
+	public void setPackagePrefix(String packagePrefix) {
+		this.packagePrefix = packagePrefix;
+	}
 	public void addIncludeTables(String tableName){
 		includeTables.add(tableName);
 	}

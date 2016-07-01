@@ -9,10 +9,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 /**
  * @author Rudy 4072883@qq.com
  * @since 2013-7-1
@@ -278,6 +280,32 @@ public class GenerateBeansAndXmls {
 		return bean.toString();
 	}
 
+	private String getListActionString(String beanName, String beanInstanceName) throws SQLException {
+		StringBuffer bean = new StringBuffer();
+		bean.append("package " + this.packagePrefix + ".action;");
+		bean.append("import java.util.HashMap;");
+		bean.append("import java.util.List;");
+		bean.append("import java.util.Map;");
+		bean.append("import org.apache.log4j.Logger;");
+		bean.append("import "+this.packagePrefix+".common.Const;");
+		bean.append("import "+this.packagePrefix+".service.MapService;");
+		bean.append("import com.gleasy.service.BusinessLevelException;");
+		bean.append("import com.gleasy.util.SystemExitListener;");
+		bean.append("import com.i139.gpf.commando.AbstractAction;");
+		bean.append("public class "+beanName+"ListAction extends AbstractAction<Map<String,Object>>{");
+		bean.append("private Logger logger = Logger.getLogger("+beanName+"ListAction.class);");
+		bean.append("private MapService mapService;public void setMapService(MapService mapService) {this.mapService = mapService;}");
+		bean.append("@Override ");
+		bean.append("protected Map<String, Object> execute(Map<String, Object> params)throws Exception {");
+		bean.append("if (SystemExitListener.isOver())throw new BusinessLevelException(Const.CODE_SYSTEM_EXIT, \"系统暂停服务\");");
+		bean.append("List<HashMap> list = mapService.list(params, \""+beanInstanceName+".find\");");
+		bean.append("Map<String, Object> result = new HashMap<String, Object>();");
+		bean.append("result.put(\"list\", list);");
+		bean.append("return result;");
+		bean.append("}");
+		bean.append("}");
+		return bean.toString();
+	}
 	private String getCacheImplString(String beanName, String beanInstanceName) throws SQLException {
 		StringBuffer bean = new StringBuffer();
 		bean.append("package " + this.packagePrefix + ".cache.impl;");
@@ -416,10 +444,14 @@ public class GenerateBeansAndXmls {
 		bean.append("\r\n");
 
 		bean.append("<update id='update' parameterClass='" + this.getBeanName(table) + "' >");
-		bean.append("update " + table + " set ");
+		bean.append("update " + table);
+		bean.append("<dynamic prepend='set'>");
 		for (String fieldName : fieldNames) {
-			bean.append(fieldName + " = #" + this.getPropertyName(fieldName) + "#,");
+			bean.append("<isNotNull prepend=',' property='" + this.getPropertyName(fieldName) + "'>");
+			bean.append(fieldName + " = #" + this.getPropertyName(fieldName) + "#");
+			bean.append("</isNotNull>");
 		}
+		bean.append("</dynamic>");
 		bean.setCharAt(bean.length() - 1, ' ');
 		bean.append("where id = #id#");
 		bean.append("</update>");
@@ -620,11 +652,15 @@ public class GenerateBeansAndXmls {
 		bean.append("\r\n");
 
 		bean.append("<update id='update' parameterClass='" + this.getBeanName(table) + "' >");
-		bean.append("update " + table + " set ");
+		bean.append("update " + table);
+		bean.append("<dynamic prepend='set'>");
 		for (String fieldName : fieldNames) {
-			bean.append(fieldName + " = #" + this.getPropertyName(fieldName) + "#,");
+			bean.append("<isNotNull prepend=',' property='" + this.getPropertyName(fieldName) + "'>");
+			bean.append(fieldName + " = #" + this.getPropertyName(fieldName) + "#");
+			bean.append("</isNotNull>");
 		}
-		bean.setCharAt(bean.length() - 1, ' ');
+		bean.append("</dynamic>");
+		//bean.setCharAt(bean.length() - 1, ' ');
 		bean.append("where id = #id#");
 		bean.append("</update>");
 		
@@ -677,11 +713,23 @@ public class GenerateBeansAndXmls {
 
 		bean.append("\r\n");
 		bean.append("\r\n");
+		
 		bean.append("<sql id='params'>");
 		//bean.append("<dynamic prepend=''>");
 		for (String fieldName : fieldNames) {
 			bean.append("<isNotNull prepend=' and ' property='" + this.getPropertyName(fieldName) + "'>");
 			bean.append(fieldName + " = #" + this.getPropertyName(fieldName) + "#");
+			bean.append("</isNotNull>");
+		}
+		//bean.append("</dynamic>");
+		
+		bean.append("</sql>");
+		bean.append("<sql id='listParams'>");
+		//bean.append("<dynamic prepend=''>");
+		for (String fieldName : fieldNames) {
+			bean.append("<isNotNull prepend=' and ' property='" + this.getPropertyName(fieldName) + "s'>");
+			bean.append(fieldName + " in");
+			bean.append("<iterate open='(' close=')' conjunction=',' property='"+this.getPropertyName(fieldName)+"s'>#"+this.getPropertyName(fieldName)+"s[]#</iterate>");
 			bean.append("</isNotNull>");
 		}
 		//bean.append("</dynamic>");
@@ -833,6 +881,15 @@ public class GenerateBeansAndXmls {
 		fw.write(this.getCacheImplString(this.getBeanName(table), this.getBeanInstanceName(table)));
 		fw.close();
 	}
+	
+	private void generateListAction(String table) throws IOException, SQLException {
+		File folder = new File(this.packagePrefix.replace(".", "/") + "/action");
+		folder.mkdirs();
+		String path = this.packagePrefix.replace(".", "/") + "/action/" + this.getBeanName(table) + "ListAction.java";
+		OutputStreamWriter fw = new OutputStreamWriter(new FileOutputStream(path), "UTF-8");
+		fw.write(this.getListActionString(this.getBeanName(table), this.getBeanInstanceName(table)));
+		fw.close();
+	}
 
 
 	private void generateSqlMapConfig(List<String> tables) throws IOException, SQLException {
@@ -880,6 +937,24 @@ public class GenerateBeansAndXmls {
 		fw.close();
 	}
 
+	private void generateActionConfig(List<String> tables) throws IOException, SQLException {
+		File folder = new File(this.packagePrefix.replace(".", "/") + "/config");
+		folder.mkdirs();
+		String path = this.packagePrefix.replace(".", "/") + "/config/" + "controller.txt";
+		OutputStreamWriter fw = new OutputStreamWriter(new FileOutputStream(path), "UTF-8");
+		for (String table : tables) {
+			fw.write("<bean class=\"" + this.packagePrefix + ".action." + this.getBeanName(table)
+					+ "ListAction\" parent=\"abstractAction\">");
+			fw.write("\r\n");
+			fw.write("  <property name=\"mapService\" ref=\"mapService\" />");
+			fw.write("\r\n");
+			fw.write("  <property name=\"path\" value=\"/"+this.getBeanInstanceName(table)+"/list\" />");
+			fw.write("\r\n");
+			fw.write("</bean>");
+			fw.write("\r\n");
+		}
+		fw.close();
+	}
 	private void generateCacheConfig(List<String> tables) throws IOException, SQLException {
 		File folder = new File(this.packagePrefix.replace(".", "/") + "/config");
 		folder.mkdirs();
@@ -954,24 +1029,26 @@ public class GenerateBeansAndXmls {
 		}
 		for (String table : tables) {
 			
-			this.generateBean(table);
+			//this.generateBean(table);
 			this.generateBeanConfig(table);
-			this.generateDao(table);
-			this.generateDaoImpl(table);
-			this.generateService(table);
-			this.generateServiceImpl(table);
+			//this.generateDao(table);
+			//this.generateDaoImpl(table);
+			//this.generateService(table);
+			//this.generateServiceImpl(table);
 			if(!isSqlServer){
 				this.generateCache(table);
 				this.generateCacheImpl(table);
 			}
+			this.generateListAction(table);
 		}
 		if(tables.size()>0){
 			this.generateSqlMapConfig(tables);
-			this.generateDaoConfig(tables);
-			this.generateServiceConfig(tables);
+			//this.generateDaoConfig(tables);
+			//this.generateServiceConfig(tables);
 			if(!isSqlServer){
 				this.generateCacheConfig(tables);
 			}
+			this.generateActionConfig(tables);
 		}
 		
 	}
