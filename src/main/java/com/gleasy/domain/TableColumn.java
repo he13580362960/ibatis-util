@@ -12,6 +12,26 @@ public class TableColumn{
 		this.comment = comment;
 	}
 	
+	
+	
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public String getJdbcType() {
+		return jdbcType;
+	}
+	public void setJdbcType(String jdbcType) {
+		this.jdbcType = jdbcType;
+	}
+	public String getComment() {
+		return comment;
+	}
+	public void setComment(String comment) {
+		this.comment = comment;
+	}
 	public String getPropertyName(){
 		String fieldName = this.name.toLowerCase();
 		String[] items = fieldName.split("_");

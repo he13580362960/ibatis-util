@@ -21,40 +21,19 @@ public class Context {
 	
 	
 	
+
+	
+
 	public Connection getConnection() {
 		return connection;
 	}
 
-	public void setConnection(Connection connection) {
-		this.connection = connection;
+	public List<Table> getTables() {
+		return tables;
 	}
-
+	
 	public String getPackagePrefix() {
 		return packagePrefix;
-	}
-
-	public void setPackagePrefix(String packagePrefix) {
-		this.packagePrefix = packagePrefix;
-	}
-
-	public String getUserName() {
-		return userName;
-	}
-
-	public void setUserName(String userName) {
-		this.userName = userName;
-	}
-
-	public DatabaseMetaData getData() {
-		return data;
-	}
-
-	public void setData(DatabaseMetaData data) {
-		this.data = data;
-	}
-
-	public void setTables(List<Table> tables) {
-		this.tables = tables;
 	}
 
 	public Context(String url,String driverClass,String userName,String password,String packagePrefix) throws Exception{
@@ -63,10 +42,10 @@ public class Context {
 		this.connection = DriverManager.getConnection(url, userName, password);
 		this.packagePrefix = packagePrefix;
 		data = this.connection.getMetaData();
-		this.getTables();
+		this.getDataBaseTables();
 	}
 	
-	public void getTables() throws Exception{
+	public void getDataBaseTables() throws Exception{
 		ResultSet rs = data.getTables(this.connection.getCatalog(), this.userName, null, new String[]{"TABLE","VIEW"});
 		while(rs.next()){
 			String tableName = rs.getString("TABLE_NAME");
@@ -80,7 +59,7 @@ public class Context {
 		ResultSet rs = data.getColumns(this.connection.getCatalog(),this.userName,table.getName(),null);
 		while(rs.next()){
 			String name = rs.getString("COLUMN_NAME");
-			String jdbcType = rs.getString("DATA_TYPE");
+			String jdbcType = rs.getString("TYPE_NAME");
 			String comment = rs.getString("REMARKS");
 			TableColumn column = new TableColumn(name, jdbcType, comment);
 			table.addColumn(column);

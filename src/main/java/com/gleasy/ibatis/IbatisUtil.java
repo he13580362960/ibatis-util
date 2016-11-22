@@ -100,12 +100,13 @@ public class IbatisUtil {
                 new Thread() {
                     public void run() {
                         try {
-                        	GenerateBeansAndXmls g = new GenerateBeansAndXmls(url.getText(), packagePrefix.getText());
+                        	/*GenerateBeansAndXmls g = new GenerateBeansAndXmls(url.getText(), packagePrefix.getText());
                             if(configuration.getIncludeTables().isEmpty()){
                             	g.generate();
                             }else{
                             	g.generateByList(configuration.getIncludeTables());
-                            }
+                            }*/
+                        	
                             log.setText("SUCCESS!");
                         } catch (Exception ex) {
                             log.setText(ex.getMessage());

@@ -34,4 +34,17 @@ public class Table {
 		}
 		return beanName;
 	}
+	
+	public String getPropertyName() {
+		String fieldName = this.name.toLowerCase();
+		String[] items = fieldName.split("_");
+		String propertyName = items[0];
+		for (int i = 1; i < items.length; i++) {
+			String item = items[i];
+			
+			propertyName += item.substring(0, 1).toUpperCase() + item.substring(1).toLowerCase();
+		}
+		
+		return propertyName;
+	}
 }
