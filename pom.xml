@@ -53,7 +53,7 @@
 					</descriptorRefs>
 					<archive>
 						<manifest>
-							<mainClass>com.gleasy.ibatis.IbatisUtil</mainClass>
+							<mainClass>com.gleasy.ibatis.Shell</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
