@@ -19,6 +19,8 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.border.LineBorder;
 
+import com.mysql.jdbc.StringUtils;
+
 /**
  * @author Rudy 4072883@qq.com
  * @since 2013-7-1
@@ -62,7 +64,7 @@ public class Shell {
      */
     private void initialize() {
         frame = new JFrame();
-        frame.setTitle("sql-parser");
+        frame.setTitle("ibatis-util");
         frame.setBounds(100, 100, 900, 650);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         Container container =  frame.getContentPane();
@@ -97,8 +99,13 @@ public class Shell {
         packagePrefix.setText("com.gleasy.report");
         p.add(packagePrefix);
         
-        JButton go = new JButton("GO");
-        panel.add(go);
+        
+        p = new JPanel();
+        panel.add(p);
+        p.setLayout(new GridLayout(1, 2, 0, 0));
+        
+        JButton go = new JButton("执行");
+        p.add(go);
         
         go.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -106,18 +113,18 @@ public class Shell {
                     public void run() {
                     	try {
                     		result.setText("GENERATING!!!!");
-                    		String includeTable = includeTables.getText();
-                    		String[] inCludeArray = includeTable.split("\n");
-                    		List<String>includeList = new ArrayList<String>();
-                    		for(String str:inCludeArray){
-                    			str = str.replace("\r?\n?", "");
-                    			includeList.add(str);
+                    		String inCludeText = includeTables.getText();
+                    		String[] inCludeTextArray = inCludeText.split("\n");
+                    		List<String> inlcudeTabelList = new ArrayList<String>();
+                    		for(String str:inCludeTextArray){
+                    			str = str.trim();
+                    			if(!StringUtils.isEmptyOrWhitespaceOnly(str)){
+                    				inlcudeTabelList.add(str);
+                    			}
                     		}
-                    		System.out.println(includeList.toString());
-                    		System.out.println(includeList.size());
                     		Context context = new Context(url.getText(), driver.getText(), userName.getText(), password.getText(), packagePrefix.getText());
                     		Generator generator = new Generator(context);
-                    		generator.generate(includeList);
+                    		generator.generate(inlcudeTabelList);
                     		result.setText("SUCCESS");
 						} catch (Exception e) {
 							result.setText(e.getMessage());
@@ -126,6 +133,19 @@ public class Shell {
                 }.start();
             }
         });
+        
+        JButton save = new JButton("保存配置");
+        p.add(save);
+        save.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                new Thread() {
+                    public void run() {
+                    	
+                    }
+                }.start();
+            }
+        });
+        
         
         p = new JPanel();
         container.add(p, BorderLayout.CENTER);
